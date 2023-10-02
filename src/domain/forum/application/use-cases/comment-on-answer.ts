@@ -3,6 +3,7 @@ import { AnswersRepository } from '../repositories/answers-repository'
 import { AnswerComment } from '../../enterprise/entities/answer-comment'
 import { AnswerCommentsRepository } from '../repositories/answer-comments-repository'
 import { Either, right } from '@/core/either'
+import { Injectable } from '@nestjs/common'
 
 interface CommentOnAnswerUseCaseRequest {
   authorId: string
@@ -16,7 +17,7 @@ type CommentOnAnswerUseCaseResponse = Either<
     answerComment: AnswerComment
   }
 >
-
+@Injectable()
 export class CommentOnAnswerUseCase {
   constructor(
     private answerRepository: AnswersRepository,

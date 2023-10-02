@@ -1,11 +1,11 @@
 import { Either, left, right } from '@/core/either'
-import { Question } from '../../enterprise/entities/question'
-import { QuestionsRepository } from '../repositories/questions-repository'
+import { NotAllowedError } from '@/core/errors/not-allowed-error'
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error'
-import { NotAllowedError } from '../../../../core/errors/not-allowed-error'
-import { QuestionAttachmentsRepository } from '../repositories/question-attachments-repository'
-import { QuestionAttachmentList } from '../../enterprise/entities/question-attachment-list'
-import { QuestionAttachment } from '../../enterprise/entities/question-attachment'
+import { Question } from '@/domain/forum/enterprise/entities/question'
+import { QuestionsRepository } from '../repositories/questions-repository'
+import { QuestionAttachmentsRepository } from '@/domain/forum/application/repositories/question-attachments-repository'
+import { QuestionAttachmentList } from '@/domain/forum/enterprise/entities/question-attachment-list'
+import { QuestionAttachment } from '@/domain/forum/enterprise/entities/question-attachment'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { Injectable } from '@nestjs/common'
 
@@ -23,21 +23,22 @@ type EditQuestionUseCaseResponse = Either<
     question: Question
   }
 >
+
 @Injectable()
 export class EditQuestionUseCase {
   constructor(
-    private questionRepository: QuestionsRepository,
+    private questionsRepository: QuestionsRepository,
     private questionAttachmentsRepository: QuestionAttachmentsRepository,
   ) {}
 
   async execute({
-    title,
     authorId,
-    content,
     questionId,
+    title,
+    content,
     attachmentsIds,
   }: EditQuestionUseCaseRequest): Promise<EditQuestionUseCaseResponse> {
-    const question = await this.questionRepository.findById(questionId)
+    const question = await this.questionsRepository.findById(questionId)
 
     if (!question) {
       return left(new ResourceNotFoundError())
@@ -67,8 +68,10 @@ export class EditQuestionUseCase {
     question.title = title
     question.content = content
 
-    this.questionRepository.save(question)
+    await this.questionsRepository.save(question)
 
-    return right({ question })
+    return right({
+      question,
+    })
   }
 }
