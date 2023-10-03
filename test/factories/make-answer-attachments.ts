@@ -30,18 +30,23 @@ export function makeAnswerAttachment(
 }
 
 @Injectable()
-export class AnswerCommentFactory {
+export class AnswerAttachmentFactory {
   constructor(private prisma: PrismaService) {}
 
-  async makePrismaAnswerComment(
-    data: Partial<AnswerCommentProps> = {},
-  ): Promise<AnswerComment> {
-    const answerComment = makeAnswerComment(data)
+  async makePrismaAnswerAttachment(
+    data: Partial<AnswerAttachmentProps> = {},
+  ): Promise<AnswerAttachment> {
+    const answerAttachment = makeAnswerAttachment(data)
 
-    await this.prisma.comment.create({
-      data: PrismaAnswerCommentMapper.toPrisma(answerComment),
+    await this.prisma.attachment.update({
+      where: {
+        id: answerAttachment.attachmentId.toString(),
+      },
+      data: {
+        answerId: answerAttachment.answerId.toString(),
+      },
     })
 
-    return answerComment
+    return answerAttachment
   }
 }

@@ -1,12 +1,12 @@
-import { Either, left, right } from '@/core/either'
-import { Answer } from '../../enterprise/entities/answer'
+import { Answer } from '@/domain/forum/enterprise/entities/answer'
 import { AnswersRepository } from '../repositories/answers-repository'
+import { Either, left, right } from '@/core/either'
 import { ResourceNotFoundError } from '@/core/errors/resource-not-found-error'
-import { NotAllowedError } from '../../../../core/errors/not-allowed-error'
-import { AnswerAttachmentsRepository } from '../repositories/answer-attachments-repository'
+import { NotAllowedError } from '@/core/errors/not-allowed-error'
 import { AnswerAttachmentList } from '../../enterprise/entities/answer-attachment-list'
-import { AnswerAttachment } from '../../enterprise/entities/answer-attachment'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { AnswerAttachmentsRepository } from '@/domain/forum/application/repositories/answer-attachments-repository'
+import { AnswerAttachment } from '../../enterprise/entities/answer-attachment'
 import { Injectable } from '@nestjs/common'
 
 interface EditAnswerUseCaseRequest {
@@ -22,6 +22,7 @@ type EditAnswerUseCaseResponse = Either<
     answer: Answer
   }
 >
+
 @Injectable()
 export class EditAnswerUseCase {
   constructor(
@@ -31,8 +32,8 @@ export class EditAnswerUseCase {
 
   async execute({
     authorId,
-    content,
     answerId,
+    content,
     attachmentsIds,
   }: EditAnswerUseCaseRequest): Promise<EditAnswerUseCaseResponse> {
     const answer = await this.answersRepository.findById(answerId)
@@ -62,11 +63,12 @@ export class EditAnswerUseCase {
     answerAttachmentList.update(answerAttachments)
 
     answer.attachments = answerAttachmentList
-
     answer.content = content
 
-    this.answersRepository.save(answer)
+    await this.answersRepository.save(answer)
 
-    return right({ answer })
+    return right({
+      answer,
+    })
   }
 }

@@ -4,14 +4,8 @@ import {
   QuestionAttachment,
   QuestionAttachmentProps,
 } from '@/domain/forum/enterprise/entities/question-attachment'
-import {
-  QuestionCommentProps,
-  QuestionComment,
-} from '@/domain/forum/enterprise/entities/question-comment'
-import { PrismaQuestionCommentMapper } from '@/infra/database/prisma/mappers/prisma-question-comment-mapper'
 import { PrismaService } from '@/infra/database/prisma/prisma.service'
 import { Injectable } from '@nestjs/common'
-import { makeQuestionComment } from './make-question-comment'
 
 export function makeQuestionAttachment(
   override: Partial<QuestionAttachmentProps> = {},
@@ -30,18 +24,23 @@ export function makeQuestionAttachment(
 }
 
 @Injectable()
-export class QuestionCommentFactory {
+export class QuestionAttachmentFactory {
   constructor(private prisma: PrismaService) {}
 
-  async makePrismaQuestionComment(
-    data: Partial<QuestionCommentProps> = {},
-  ): Promise<QuestionComment> {
-    const questionComment = makeQuestionComment(data)
+  async makePrismaQuestionAttachment(
+    data: Partial<QuestionAttachmentProps> = {},
+  ): Promise<QuestionAttachment> {
+    const questionAttachment = makeQuestionAttachment(data)
 
-    await this.prisma.comment.create({
-      data: PrismaQuestionCommentMapper.toPrisma(questionComment),
+    await this.prisma.attachment.update({
+      where: {
+        id: questionAttachment.attachmentId.toString(),
+      },
+      data: {
+        questionId: questionAttachment.questionId.toString(),
+      },
     })
 
-    return questionComment
+    return questionAttachment
   }
 }
